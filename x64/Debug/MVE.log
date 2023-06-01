@@ -1,0 +1,110 @@
+﻿  StructureFromMotion.cpp
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(106,31): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(106,22): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(106,13): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(106,4): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(105,31): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(105,22): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(105,13): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(105,4): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(104,56): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(104,47): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(104,38): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+C:\Users\Parker\source\repos\MVE\StructureFromMotion.cpp(104,29): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=float
+          ]
+  MVE.vcxproj -> C:\Users\Parker\source\repos\MVE\x64\Debug\MVE.exe
