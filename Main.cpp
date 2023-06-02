@@ -9,6 +9,7 @@ int main() {
 	sfm.pairwise_match_views();
 	sfm.initialize_intrinsics();
 	sfm.intitialize_structure();
+	sfm.increment_views();
 
 	//debug_view_scene_matches(sfm.get_scene_views(), sfm.get_match_matrix());
 
