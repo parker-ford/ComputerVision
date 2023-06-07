@@ -5,8 +5,8 @@
 using namespace std;
 using namespace cv;
 
-const float RATIO_FILTER_LIMIT = 0.8f;
-const float EPIPOLAR_MATCH_SURVIVAL_RATE = 0.5f;
+const float RATIO_FILTER_LIMIT = 0.6f;
+const float EPIPOLAR_MATCH_SURVIVAL_RATE = 0.3f;
 
 
 vector<vector<DMatch>> get_knn_matches(Mat descriptors1, Mat descriptors2);
@@ -17,4 +17,4 @@ vector<DMatch> reciprocity_filter_matches(vector<DMatch> matches, vector<DMatch>
 
 vector<DMatch> epipolar_filter_matches(vector<DMatch> matches, vector<KeyPoint> keypoints1, vector<KeyPoint> keypoints2);
 
-//vector<DMatch> get_view_matches(View view1, View view2);
+vector<DMatch> get_basic_matches(Mat descriptors1, Mat descriptors2);

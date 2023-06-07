@@ -65,7 +65,7 @@ void StructureFromMotion::pairwise_match_views() {
 			Matches epipolar_filtered_matches = epipolar_filter_matches(reciprocity_filtered_matches, view1.keypoints, view2.keypoints);
 
 			match_matrix[i][j] = epipolar_filtered_matches;
-
+		
 			if (PRINT_STATUS) {
 				cout << "Found Matches for Pair: " << i << " , " << j << endl;
 			}
@@ -230,6 +230,16 @@ void StructureFromMotion::triangulate_points_and_add_to_cloud(View view1, View v
 	//Convert to 3D
 	Mat points3D;
 	convertPointsFromHomogeneous(points4D.t(), points3D);
+
+	//New shit
+	Mat_<double> R = (Mat_<double>(3, 3) << view1.projection_matrix(0, 0), view1.projection_matrix(0, 1), view1.projection_matrix(0, 2), view1.projection_matrix(1, 0), view1.projection_matrix(1, 1), view1.projection_matrix(1, 2), view1.projection_matrix(2, 0), view1.projection_matrix(2, 1), view1.projection_matrix(2, 2));
+	Vec3d rvec;
+	Rodrigues(R, rvec);
+	Vec3d tvec(view1.projection_matrix(0, 3), view1.projection_matrix(1, 3), view1.projection_matrix(2, 3));
+	vector<Point2f> reprojected_points;
+	projectPoints(points3D, rvec, tvec, intrinsics.K, Mat(), reprojected_points);
+
+	//May return
 	points3D = points3D.reshape(1);
 
 	for (size_t i = 0; i < points3D.rows; i++) {
@@ -325,6 +335,16 @@ void StructureFromMotion::add_view_to_cloud(View view)
 
 	//Testing
 	triangulate_points_and_add_to_cloud(scene_views[view.index - 1], scene_views[view.index]);
+}
+
+vector<Point3f> StructureFromMotion::point_cloud_to_vector()
+{
+	vector<Point3f> point_vector;
+	for (size_t i = 0; i < point_cloud.size(); i++) {
+		point_vector.push_back(point_cloud[i].point_3D);
+	}
+
+	return point_vector;
 }
 
 

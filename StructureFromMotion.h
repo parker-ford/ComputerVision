@@ -46,10 +46,10 @@ struct Intrinsics {
 typedef vector<View> SceneViews;
 typedef vector<DMatch> Matches;
 typedef vector<vector<Matches>> MatchMatrix;
-typedef vector<PointCloudPoint> PointCloud;
+typedef vector<PointCloudPoint> SFMPointCloud;
 typedef map<int, Correspondence_2D3D> Corresondence_2D3D_map;
 
-const string IMAGE_DIR = "goblin";
+const string IMAGE_DIR = "table";
 const int DOWNSCALE_FACTOR = 2;
 const bool PRINT_STATUS = true;
 const float RANSAC_THRESHOLD = 1;
@@ -65,16 +65,17 @@ class StructureFromMotion {
 		void pairwise_match_views();
 		void initialize_intrinsics();
 		void intitialize_structure();
-		void increment_views();
+		 void increment_views();
 		
 		
 		SceneViews get_scene_views();
 		MatchMatrix get_match_matrix();
+		vector<Point3f> point_cloud_to_vector();
 
 	private:
 		SceneViews scene_views;
 		MatchMatrix match_matrix;
-		PointCloud point_cloud;
+		SFMPointCloud point_cloud;
 		Intrinsics intrinsics;
 		Corresondence_2D3D_map correspondence_2D3D_map;
 
@@ -87,4 +88,5 @@ class StructureFromMotion {
 		void triangulate_points_and_add_to_cloud(View view1, View view2);
 		void set_2D3D_correspondence(View new_view);
 		void add_view_to_cloud(View view);
+		
 };
