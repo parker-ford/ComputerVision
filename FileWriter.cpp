@@ -1,13 +1,11 @@
 #include "FileWriter.h"
 
 void write_point_data(Mat points, ofstream& file) {
-
-	for (int i = 0; i < points.rows; i++) {
-		//position
-		for (int j = 0; j < points.cols; j++) {
-			//cout << points.at<float>(j, i);
+	for (size_t i = 0; i < points.rows; i++) {
+		for (size_t j = 0; j < points.cols; j++) {
 			file << points.at<float>(i, j) << ",";
 		}
+		//TODO: Write color data. Color set to white for now
 		file << 255 << "," << 255 << "," << 255 << "," << endl;
 	}
 }

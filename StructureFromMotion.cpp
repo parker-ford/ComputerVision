@@ -2,7 +2,6 @@
 
 
 StructureFromMotion::StructureFromMotion() {
-
 }
 
 void StructureFromMotion::read_images() {
@@ -20,15 +19,12 @@ void StructureFromMotion::read_images() {
 		}
 	}
 
+	//Initialize match matrix size
 	match_matrix = vector<vector<Matches>>(image_paths.size(), vector<Matches>(image_paths.size()));
 
-	//For Debugging
-	camera_file.open("D:/Unity/HDRP - Point Cloud/Assets/cameras.csv");
-	points_file.open("D:/Unity/HDRP - Point Cloud/Assets/points.csv");
-
-	//camera_file.open("D:/Unity/HDRP - Point Cloud/Assets/cameras.csv", ios::app);
-	//points_file.open("D:/Unity/HDRP - Point Cloud/Assets/points.csv", ios::app);
-
+	//Open output files
+	camera_file.open(PATH_TO_CAMERAS_CSV);
+	points_file.open(PATH_TO_POINTS_CSV);
 }
 
 
@@ -54,15 +50,16 @@ void StructureFromMotion::pairwise_match_views() {
 			View view1 = scene_views[i];
 			View view2 = scene_views[j];
 
-			vector<Matches> knn_matches = get_knn_matches(view1.descriptors, view2.descriptors);
-			vector<Matches> knn_matches_reciprocal = get_knn_matches(view2.descriptors, view1.descriptors);
+			vector<Matches> knn_matches = get_2nn_matches(view1.descriptors, view2.descriptors);
+			vector<Matches> knn_matches_reciprocal = get_2nn_matches(view2.descriptors, view1.descriptors);
 			
 			Matches ratio_filtered_matches = ratio_filter_matches(knn_matches);
 			Matches ratio_filtered_matches_reciprocal = ratio_filter_matches(knn_matches_reciprocal);
 			
 			Matches reciprocity_filtered_matches = reciprocity_filter_matches(ratio_filtered_matches, ratio_filtered_matches_reciprocal);
 			
-			Matches epipolar_filtered_matches = epipolar_filter_matches(reciprocity_filtered_matches, view1.keypoints, view2.keypoints);
+			//Matches epipolar_filtered_matches = epipolar_filter_matches(reciprocity_filtered_matches, view1.keypoints, view2.keypoints);
+			Matches epipolar_filtered_matches = reciprocity_filtered_matches;
 
 			match_matrix[i][j] = epipolar_filtered_matches;
 		
@@ -73,15 +70,22 @@ void StructureFromMotion::pairwise_match_views() {
 	}
 }
 
-void StructureFromMotion::initialize_intrinsics()
-{
-	//TODO: May need to change principal_point
+void StructureFromMotion::initialize_intrinsics() {
+	//Iphone Camera
 	double cx = 1521.316552582157;
 	double cy = 2024.8360801192564;
-	//double cx = scene_views[0].image.size().width / 2;
-	//double cy = scene_views[0].image.size().height / 2;
 	double fx = 3031.53030720967;
 	double fy = 3033.7600300469517;
+	
+
+	//Dino Sparse Ring
+	/*
+	double cx = 316.730000;
+	double cy = 200.550000;
+	double fx = 3310.400000;
+	double fy = 3325.500000;
+	*/
+
 	Mat K = (Mat_<double>(3, 3) << (fx / DOWNSCALE_FACTOR), 0, (cx / DOWNSCALE_FACTOR), 0, (fy / DOWNSCALE_FACTOR), (cy / DOWNSCALE_FACTOR), 0, 0, 1);
 	double focal_length = K.at<double>(0, 0);
 	Point2d principal_point(K.at<double>(0, 2), K.at<double>(1, 2));
@@ -92,8 +96,7 @@ void StructureFromMotion::initialize_intrinsics()
 
 }
 
-void StructureFromMotion::intitialize_structure()
-{
+void StructureFromMotion::intitialize_baseline_structure() {
 	pair<View, View> baseline_pair = find_baseline_pair();
 	View view1 = baseline_pair.first;
 	View view2 = baseline_pair.second;
@@ -116,10 +119,6 @@ void StructureFromMotion::intitialize_structure()
 
 	scene_views[view1.index].projection_matrix = P_left;
 	scene_views[view2.index].projection_matrix = P_right;
-	//view1.projection_matrix = P_left;
-	//view2.projection_matrix = P_right;
-
-
 
 	//Write camera file
 	if (camera_file.is_open()) {
@@ -131,60 +130,24 @@ void StructureFromMotion::intitialize_structure()
 	}
 
 	triangulate_points_and_add_to_cloud(scene_views[view1.index], scene_views[view2.index]);
-
 }
 
-void StructureFromMotion::increment_views()
-{
+void StructureFromMotion::increment_views() {
 	for (size_t i = 2; i < scene_views.size(); i++) {
 		set_2D3D_correspondence(scene_views[i]);
 		add_view_to_cloud(scene_views[i]);
 	}
-
-	/*
-	cout << "incrementing view: " << endl;
-	//New View 
-	View new_view = scene_views[2];
-	Correspondence_2D3D correspondence_2D3D;
-
-	//For every Point in the point cloud
-	for (size_t i = 0; i < point_cloud.size(); i++) {
-		PointCloudPoint point = point_cloud[i];
-		//Search points contributing views
-		for (size_t j = 0; j < point.contributing_views.size(); j++) {
-			ContributingView contributing_view = point.contributing_views[j];
-			int found_index_in_new_view = -1;
-			for (size_t k = 0; k < match_matrix[contributing_view.view_index][new_view.index].size(); k++) {
-				DMatch match = match_matrix[contributing_view.view_index][new_view.index][k];
-				if (match.queryIdx == contributing_view.view_keypoint_index) {
-					found_index_in_new_view = match.trainIdx;
-				}
-
-				if (found_index_in_new_view > 0) {
-					correspondence_2D3D.points_2D.push_back(new_view.keypoints[found_index_in_new_view].pt);
-					correspondence_2D3D.points_3D.push_back(point.point_3D);
-					break;
-				}
-			}
-		}
-	}
-
-	correspondence_2D3D_map[new_view.index] = correspondence_2D3D;
-	*/
 }
 
-SceneViews StructureFromMotion::get_scene_views()
-{
+SceneViews StructureFromMotion::get_scene_views() {
 	return this->scene_views;
 }
 
-MatchMatrix StructureFromMotion::get_match_matrix()
-{
+MatchMatrix StructureFromMotion::get_match_matrix() {
 	return match_matrix;
 }
 
-Correspondence_2D2D StructureFromMotion::matches_to_correspondence(Matches matches, View view_left, View view_right)
-{
+Correspondence_2D2D StructureFromMotion::matches_to_correspondence(Matches matches, View view_left, View view_right) {
 	vector<Point2f>leftPts, rightPts;
 	for (size_t i = 0; i < matches.size(); i++) {
 		leftPts.push_back(view_left.keypoints[matches[i].queryIdx].pt);
@@ -197,14 +160,12 @@ Correspondence_2D2D StructureFromMotion::matches_to_correspondence(Matches match
 	return correspondence;
 }
 
-pair<View, View> StructureFromMotion::find_baseline_pair()
-{
+pair<View, View> StructureFromMotion::find_baseline_pair() {
 	//TODO: Placeholder - future implementation should have a system for finding optimal baseline pair
 	return pair<View, View>(scene_views[0], scene_views[1]);
 }
 
-void StructureFromMotion::triangulate_points_and_add_to_cloud(View view1, View view2)
-{
+void StructureFromMotion::triangulate_points_and_add_to_cloud(View view1, View view2) {
 
 	//TODO: write check to ensure theat view1 and view2 projection matrix is set
 
@@ -213,6 +174,7 @@ void StructureFromMotion::triangulate_points_and_add_to_cloud(View view1, View v
 	//Undistort points
 	Mat norm_L_points;
 	Mat norm_R_points;
+
 	//TODO: Figure out distance coefficient. Should replace Mat()
 	undistortPoints(correspondence.left_points, norm_L_points, intrinsics.K, Mat());
 	undistortPoints(correspondence.right_points, norm_R_points, intrinsics.K, Mat());
@@ -224,22 +186,12 @@ void StructureFromMotion::triangulate_points_and_add_to_cloud(View view1, View v
 
 	//Triangulate points
 	Mat points4D;
-	//triangulatePoints(Pleft, Pright, leftPts_h, rightPts_h, points4D);
 	triangulatePoints(view1.projection_matrix, view2.projection_matrix, norm_L_points, norm_R_points, points4D);
 
 	//Convert to 3D
 	Mat points3D;
 	convertPointsFromHomogeneous(points4D.t(), points3D);
 
-	//New shit
-	Mat_<double> R = (Mat_<double>(3, 3) << view1.projection_matrix(0, 0), view1.projection_matrix(0, 1), view1.projection_matrix(0, 2), view1.projection_matrix(1, 0), view1.projection_matrix(1, 1), view1.projection_matrix(1, 2), view1.projection_matrix(2, 0), view1.projection_matrix(2, 1), view1.projection_matrix(2, 2));
-	Vec3d rvec;
-	Rodrigues(R, rvec);
-	Vec3d tvec(view1.projection_matrix(0, 3), view1.projection_matrix(1, 3), view1.projection_matrix(2, 3));
-	vector<Point2f> reprojected_points;
-	projectPoints(points3D, rvec, tvec, intrinsics.K, Mat(), reprojected_points);
-
-	//May return
 	points3D = points3D.reshape(1);
 
 	for (size_t i = 0; i < points3D.rows; i++) {
@@ -298,10 +250,13 @@ void StructureFromMotion::set_2D3D_correspondence(View new_view)
 	correspondence_2D3D_map[new_view.index] = correspondence_2D3D;
 }
 
-void StructureFromMotion::add_view_to_cloud(View view)
-{
+void StructureFromMotion::add_view_to_cloud(View view) {
 	Correspondence_2D3D correspondence_2D3D = correspondence_2D3D_map[view.index];
-	cout << "adding view to cloud" << endl;
+
+	if (correspondence_2D3D.points_3D.size() < 4) {
+		cout << "not enough points in correspondence for view " << view.index << endl;
+		return;
+	}	
 
 	double minVal, maxVal;
 	minMaxIdx(correspondence_2D3D.points_2D, &minVal, &maxVal);
@@ -333,7 +288,7 @@ void StructureFromMotion::add_view_to_cloud(View view)
 		cout << "Unable to open camera file\n";
 	}
 
-	//Testing
+	//Assumes that previous view is ideal for triangulation. 
 	triangulate_points_and_add_to_cloud(scene_views[view.index - 1], scene_views[view.index]);
 }
 

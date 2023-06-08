@@ -1,31 +1,13 @@
 #include "ImageMatcher.h"
 
-//vector<DMatch> get_view_matches(View view1, View view2)
-//{
-//	vector<vector<DMatch>> knn_matches = get_knn_matches(view1.descriptors, view2.descriptors);
-//	vector<vector<DMatch>> knn_matches_reciprocal = get_knn_matches(view2.descriptors, view1.descriptors);
-//
-//	vector<DMatch> ratio_filtered_matches = ratio_filter_matches(knn_matches);
-//	vector<DMatch> ratio_filtered_matches_reciprocal = ratio_filter_matches(knn_matches_reciprocal);
-//
-//	vector<DMatch> reciprocity_filtered_matches = reciprocity_filter_matches(ratio_filtered_matches, ratio_filtered_matches_reciprocal);
-//
-//	vector<DMatch> epipolar_filtered_matches = epipolar_filter_matches(reciprocity_filtered_matches, view1.keypoints, view2.keypoints);
-//
-//
-//	return epipolar_filtered_matches;
-//}
-
-vector<vector<DMatch>> get_knn_matches(Mat descriptors1, Mat descriptors2)
-{
+vector<vector<DMatch>> get_2nn_matches(Mat descriptors1, Mat descriptors2) {
 	Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce-Hamming");
 	vector<vector<DMatch>> matches;
 	matcher->knnMatch(descriptors1, descriptors2, matches, 2);
 	return matches;
 }
 
-vector<DMatch> ratio_filter_matches(vector<vector<DMatch>> matches)
-{
+vector<DMatch> ratio_filter_matches(vector<vector<DMatch>> matches) {
 	std::vector<DMatch> matches_ratio_filtered;
 	for (size_t i = 0; i < matches.size(); i++) {
 		if (matches[i][0].distance < RATIO_FILTER_LIMIT * matches[i][1].distance) {
@@ -36,8 +18,7 @@ vector<DMatch> ratio_filter_matches(vector<vector<DMatch>> matches)
 	return matches_ratio_filtered;
 }
 
-vector<DMatch> reciprocity_filter_matches(vector<DMatch> matches, vector<DMatch> matches_reciprocal)
-{
+vector<DMatch> reciprocity_filter_matches(vector<DMatch> matches, vector<DMatch> matches_reciprocal) {
 	vector<DMatch> merged_matches;
 	for (size_t i = 0; i < matches_reciprocal.size(); i++) {
 		DMatch match_reciprocal = matches_reciprocal[i];
@@ -58,8 +39,7 @@ vector<DMatch> reciprocity_filter_matches(vector<DMatch> matches, vector<DMatch>
 	return merged_matches;
 }
 
-vector<DMatch> epipolar_filter_matches(vector<DMatch> matches, vector<KeyPoint> keypoints1, vector<KeyPoint> keypoints2)
-{
+vector<DMatch> epipolar_filter_matches(vector<DMatch> matches, vector<KeyPoint> keypoints1, vector<KeyPoint> keypoints2) {
 	vector<DMatch> filtered_matches;
 	vector<uint8_t> inlier_mask(matches.size());
 	vector<Point2f> points1, points2;
@@ -92,12 +72,10 @@ vector<DMatch> epipolar_filter_matches(vector<DMatch> matches, vector<KeyPoint> 
 	return filtered_matches;
 }
 
-vector<DMatch> get_basic_matches(Mat descriptors1, Mat descriptors2)
-{
+vector<DMatch> get_basic_matches(Mat descriptors1, Mat descriptors2) {
 	Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce-Hamming");
 	vector<DMatch> matches;
 	matcher->match(descriptors1, descriptors2, matches);
-
 
 	return matches;
 }
